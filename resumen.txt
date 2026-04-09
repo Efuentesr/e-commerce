@@ -1,0 +1,49 @@
+Aplicación lista para ejecutar                                                                                        
+  Levantar todo con Docker:                                                                                             
+  docker compose up --build
+
+  Eso:
+  1. Levanta PostgreSQL con health check
+  2. Ejecuta migraciones automáticamente
+  3. Carga 112 productos en 10 categorías con imágenes
+  4. Inicia backend en http://localhost:8000
+  5. Inicia frontend en http://localhost:3000
+
+  Accesos de prueba
+
+  ┌─────────────────────────────┬────────────────┐
+  │             URL             │  Descripción   │
+  ├─────────────────────────────┼────────────────┤
+  │ http://localhost:3000       │ Tienda (React) │
+  ├─────────────────────────────┼────────────────┤
+  │ http://localhost:8000/admin │ Django Admin   │
+  ├─────────────────────────────┼────────────────┤
+  │ http://localhost:8000/api/  │ API REST       │
+  └─────────────────────────────┴────────────────┘
+
+  ┌──────────┬────────────┬───────────────┐
+  │ Usuario  │ Contraseña │      Rol      │
+  ├──────────┼────────────┼───────────────┤
+  │ admin    │ admin123   │ Administrador │
+  ├──────────┼────────────┼───────────────┤
+  │ usuario1 │ pass1234   │ Cliente       │
+  ├──────────┼────────────┼───────────────┤
+  │ usuario2 │ pass1234   │ Cliente       │
+  └──────────┴────────────┴───────────────┘
+
+  Qué se implementó
+
+  Backend (Django):
+  - 3 apps: accounts, products, sales
+  - Máquina de estados de órdenes con control de stock (separated_qty)
+  - Auditoría de precios con django-simple-history
+  - 112 productos con 3 imágenes Pillow cada uno
+  - JWT con refresh automático
+
+  Frontend (React + Tailwind):
+  - UI tipo Amazon (navbar, grid multi-columna, sidebar de categorías)
+  - Carrito persistente (localStorage para invitados → sincroniza al login)
+  - Drawer de carrito con generación de pedido
+  - Página de órdenes con botón Enviar por WhatsApp
+  - Panel de admin: editar descuentos, marcar pagada, anular
+  - Registro/login de usuarios

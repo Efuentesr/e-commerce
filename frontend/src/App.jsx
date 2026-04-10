@@ -8,6 +8,7 @@ import ProductDetail from './pages/ProductDetail'
 import Orders from './pages/Orders'
 import OrderDetail from './pages/OrderDetail'
 import AdminPanel from './pages/AdminPanel'
+import Profile from './pages/Profile'
 import ProtectedRoute from './components/ProtectedRoute'
 
 export default function App() {
@@ -28,6 +29,10 @@ export default function App() {
           <Route
             path="/orders/:id"
             element={<ProtectedRoute><OrderDetail /></ProtectedRoute>}
+          />
+          <Route
+            path="/profile"
+            element={<ProtectedRoute><Profile /></ProtectedRoute>}
           />
           <Route
             path="/admin"

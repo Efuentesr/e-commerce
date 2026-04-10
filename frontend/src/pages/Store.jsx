@@ -9,6 +9,7 @@ export default function Store() {
   const [categories, setCategories] = useState([])
   const [loading, setLoading] = useState(true)
   const [pagination, setPagination] = useState({ count: 0, next: null, previous: null })
+  const [showMobileFilters, setShowMobileFilters] = useState(false)
 
   const categorySlug = searchParams.get('category') || ''
   const search = searchParams.get('search') || ''
@@ -96,14 +97,74 @@ export default function Store() {
 
       {/* Grid de productos */}
       <div className="flex-1">
-        {/* Encabezado de resultados */}
-        <div className="flex items-center justify-between mb-4">
+        {/* Encabezado de resultados + botón filtros mobile */}
+        <div className="flex items-center justify-between mb-4 gap-3">
           <p className="text-sm text-gray-600">
             {loading ? 'Buscando...' : `${pagination.count} resultado${pagination.count !== 1 ? 's' : ''}`}
             {search && <span> para "<strong>{search}</strong>"</span>}
             {categorySlug && <span> en <strong>{categories.find(c => c.slug === categorySlug)?.name || categorySlug}</strong></span>}
           </p>
+          <button
+            onClick={() => setShowMobileFilters((v) => !v)}
+            className="md:hidden flex items-center gap-1 text-sm border border-gray-300 rounded px-3 py-1 bg-white text-gray-700 hover:bg-gray-50 flex-shrink-0"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2a1 1 0 01-.293.707L13 13.414V19a1 1 0 01-.553.894l-4 2A1 1 0 017 21v-7.586L3.293 6.707A1 1 0 013 6V4z" />
+            </svg>
+            Filtros
+          </button>
         </div>
+
+        {/* Panel de filtros mobile */}
+        {showMobileFilters && (
+          <div className="md:hidden bg-white border rounded-lg p-4 mb-4 shadow-sm">
+            <div className="grid grid-cols-2 gap-4 text-sm">
+              <div>
+                <h3 className="font-bold text-gray-700 mb-2">Categoría</h3>
+                <ul className="space-y-1">
+                  <li>
+                    <button
+                      onClick={() => { setFilter('category', ''); setShowMobileFilters(false) }}
+                      className={`w-full text-left px-2 py-1 rounded transition-colors ${!categorySlug ? 'bg-amazon-orange text-amazon-blue font-semibold' : 'hover:bg-gray-100'}`}
+                    >
+                      Todas
+                    </button>
+                  </li>
+                  {categories.map((cat) => (
+                    <li key={cat.slug}>
+                      <button
+                        onClick={() => { setFilter('category', cat.slug); setShowMobileFilters(false) }}
+                        className={`w-full text-left px-2 py-1 rounded transition-colors ${categorySlug === cat.slug ? 'bg-amazon-orange text-amazon-blue font-semibold' : 'hover:bg-gray-100'}`}
+                      >
+                        {cat.name}
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+              <div>
+                <h3 className="font-bold text-gray-700 mb-2">Ordenar por</h3>
+                <ul className="space-y-1">
+                  {[
+                    ['-created_at', 'Más recientes'],
+                    ['price', 'Menor precio'],
+                    ['-price', 'Mayor precio'],
+                    ['name', 'Nombre A-Z'],
+                  ].map(([val, label]) => (
+                    <li key={val}>
+                      <button
+                        onClick={() => { setFilter('ordering', val); setShowMobileFilters(false) }}
+                        className={`w-full text-left px-2 py-1 rounded transition-colors ${ordering === val ? 'bg-amazon-orange text-amazon-blue font-semibold' : 'hover:bg-gray-100'}`}
+                      >
+                        {label}
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            </div>
+          </div>
+        )}
 
         {loading ? (
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">

@@ -10,6 +10,7 @@ export default function Navbar({ onSearch }) {
   const navigate = useNavigate()
   const [query, setQuery] = useState('')
   const [categories, setCategories] = useState([])
+  const [menuOpen, setMenuOpen] = useState(false)
 
   useEffect(() => {
     api.get('/products/categories/')
@@ -20,34 +21,37 @@ export default function Navbar({ onSearch }) {
   const handleSearch = (e) => {
     e.preventDefault()
     navigate(`/?search=${encodeURIComponent(query)}`)
+    setMenuOpen(false)
   }
 
   const handleLogout = () => {
     logout()
+    setMenuOpen(false)
     navigate('/')
   }
 
   return (
     <header className="bg-amazon-blue text-white sticky top-0 z-40">
       {/* Barra principal */}
-      <div className="flex items-center gap-3 px-4 py-2">
-        {/* Logo */}
-        <Link to="/" className="flex-shrink-0 text-xl font-bold text-amazon-orange mr-2">
-          TiendaOnline
+      <div className="flex items-center gap-2 px-4 py-2">
+        {/* Logo — texto corto en mobile */}
+        <Link to="/" className="flex-shrink-0 font-bold text-green-500">
+          <span className="hidden sm:inline text-xl">TiendaOnline</span>
+          <span className="sm:hidden text-base">Tienda</span>
         </Link>
 
-        {/* Buscador */}
-        <form onSubmit={handleSearch} className="flex flex-1 max-w-2xl">
+        {/* Buscador — min-w-0 evita que desborde el flex */}
+        <form onSubmit={handleSearch} className="flex flex-1 min-w-0">
           <input
             type="text"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            placeholder="Buscar productos..."
-            className="flex-1 rounded-l px-3 py-2 text-gray-900 text-sm outline-none"
+            placeholder="Buscar..."
+            className="flex-1 min-w-0 rounded-l px-3 py-2 text-gray-900 text-sm outline-none"
           />
           <button
             type="submit"
-            className="bg-amazon-orange hover:bg-amazon-orange-dark px-4 rounded-r transition-colors"
+            className="bg-amazon-orange hover:bg-amazon-orange-dark px-3 rounded-r transition-colors flex-shrink-0"
             aria-label="Buscar"
           >
             <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-amazon-blue" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -56,41 +60,44 @@ export default function Navbar({ onSearch }) {
           </button>
         </form>
 
-        {/* Acciones de usuario */}
-        <div className="flex items-center gap-4 ml-auto text-sm flex-shrink-0">
-          {user ? (
-            <>
-              <span className="hidden sm:block text-gray-300">Hola, {user.username}</span>
-              <Link to="/orders" className="hover:text-amazon-orange transition-colors">
-                Mis Pedidos
-              </Link>
-              {user.is_staff && (
-                <Link to="/admin" className="hover:text-amazon-orange transition-colors font-semibold">
-                  Admin
+        {/* Lado derecho — contenedor flex-shrink-0 garantiza que nunca se oculte */}
+        <div className="flex items-center gap-3 flex-shrink-0">
+          {/* Links de usuario — solo desktop */}
+          <div className="hidden sm:flex items-center gap-4 text-sm">
+            {user ? (
+              <>
+                <span className="text-gray-300">Hola, <b>{user.username}</b></span>
+                <Link to="/orders" className="hover:text-amazon-orange transition-colors">
+                  Mis Pedidos
                 </Link>
-              )}
-              <button
-                onClick={handleLogout}
-                className="hover:text-amazon-orange transition-colors"
-              >
-                Salir
-              </button>
-            </>
-          ) : (
-            <>
-              <Link to="/login" className="hover:text-amazon-orange transition-colors">
-                Iniciar Sesión
-              </Link>
-              <Link to="/register" className="hover:text-amazon-orange transition-colors">
-                Registrarse
-              </Link>
-            </>
-          )}
+                <Link to="/profile" className="hover:text-amazon-orange transition-colors">
+                  Mi Perfil
+                </Link>
+                {user.is_staff && (
+                  <Link to="/admin" className="hover:text-amazon-orange transition-colors font-semibold">
+                    Admin
+                  </Link>
+                )}
+                <button onClick={handleLogout} className="hover:text-amazon-orange transition-colors">
+                  Salir
+                </button>
+              </>
+            ) : (
+              <>
+                <Link to="/login" className="hover:text-amazon-orange transition-colors">
+                  Iniciar Sesión
+                </Link>
+                <Link to="/register" className="hover:text-amazon-orange transition-colors">
+                  Registrarse
+                </Link>
+              </>
+            )}
+          </div>
 
-          {/* Carrito */}
+          {/* Carrito — siempre visible */}
           <button
             onClick={() => setOpen(true)}
-            className="relative flex items-center gap-1 hover:text-amazon-orange transition-colors"
+            className="relative hover:text-amazon-orange transition-colors"
             aria-label="Carrito"
           >
             <svg xmlns="http://www.w3.org/2000/svg" className="h-7 w-7" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -102,8 +109,59 @@ export default function Navbar({ onSearch }) {
               </span>
             )}
           </button>
+
+          {/* Hamburguesa — solo mobile */}
+          <button
+            onClick={() => setMenuOpen((v) => !v)}
+            className="sm:hidden hover:text-amazon-orange transition-colors"
+            aria-label="Menú"
+          >
+            {menuOpen ? (
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            ) : (
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+              </svg>
+            )}
+          </button>
         </div>
       </div>
+
+      {/* Menú desplegable mobile */}
+      {menuOpen && (
+        <div className="sm:hidden bg-amazon-blue-light border-t border-white/10 px-4 py-3 flex flex-col gap-3 text-sm">
+          {user ? (
+            <>
+              <span className="text-gray-300">Hola, <b>{user.username}</b></span>
+              <Link to="/orders" onClick={() => setMenuOpen(false)} className="hover:text-amazon-orange transition-colors">
+                Mis Pedidos
+              </Link>
+              <Link to="/profile" onClick={() => setMenuOpen(false)} className="hover:text-amazon-orange transition-colors">
+                Mi Perfil
+              </Link>
+              {user.is_staff && (
+                <Link to="/admin" onClick={() => setMenuOpen(false)} className="hover:text-amazon-orange transition-colors font-semibold">
+                  Panel Admin
+                </Link>
+              )}
+              <button onClick={handleLogout} className="text-left hover:text-amazon-orange transition-colors">
+                Cerrar sesión
+              </button>
+            </>
+          ) : (
+            <>
+              <Link to="/login" onClick={() => setMenuOpen(false)} className="hover:text-amazon-orange transition-colors">
+                Iniciar Sesión
+              </Link>
+              <Link to="/register" onClick={() => setMenuOpen(false)} className="hover:text-amazon-orange transition-colors">
+                Registrarse
+              </Link>
+            </>
+          )}
+        </div>
+      )}
 
       {/* Barra secundaria — categorías dinámicas desde la API */}
       <div className="bg-amazon-blue-light px-4 py-1 flex gap-6 text-sm overflow-x-auto">

@@ -47,3 +47,61 @@ Aplicación lista para ejecutar
   - Página de órdenes con botón Enviar por WhatsApp
   - Panel de admin: editar descuentos, marcar pagada, anular
   - Registro/login de usuarios
+
+
+
+  Sí, puedo ayudarte a desplegarlo. Las opciones más prácticas para este stack:
+
+  ---
+  Opción 1 — Railway (la más simple para este proyecto)
+  - Soporta Docker Compose directamente
+  - PostgreSQL incluido como servicio
+  - Free tier disponible
+  - Despliegue desde GitHub o CLI
+
+  Opción 2 — Render
+  - Backend Django como Web Service
+  - Frontend React como Static Site
+  - PostgreSQL administrado
+  - Free tier con limitaciones (se "duerme" tras inactividad)
+
+  Opción 3 — Fly.io
+  - Muy cercano a Docker, buen control
+  - Free tier generoso
+  - Requiere algo más de configuración
+
+  ---
+  Mi recomendación: Railway
+
+  Es la que menos fricción tiene para un proyecto con docker-compose.yml ya configurado. El mayor trabajo sería:
+
+  1. Separar las variables de entorno para producción (.env.production)
+  2. Configurar el VITE_API_URL del frontend para apuntar al backend desplegado
+  3. Ajustar ALLOWED_HOSTS y CORS_ALLOWED_ORIGINS en Django
+  4. Manejar los archivos de medios (imágenes) — probablemente con un bucket S3 o Cloudflare R2
+
+  Cuando retomes mañana arrancamos directamente con eso. Hasta entonces!
+
+
+  ● Sí, ya está construida con Tailwind CSS que es responsive por defecto. Se usaron clases como sm:, md:, lg: en el grid
+  de productos y otros componentes.
+                                                                                                                          Sin embargo, siendo honesto, no fue probada específicamente en móvil durante el desarrollo, así que probablemente haya   algunos ajustes menores para pulir la experiencia:                                                                   
+  - El Navbar con la barra de categorías puede quedar apretado en pantallas chicas
+  - El AdminPanel tiene tablas/filas con mucha información horizontal
+  - El CartDrawer debería funcionar bien (es un panel lateral fijo)
+  - La galería de producto tiene una disposición que puede necesitar ajuste en pantallas pequeñas
+
+  ---
+  Para mañana podríamos:
+
+  1. Probarla tal cual — abrís http://localhost:3000 desde el celular conectado a la misma red WiFi
+  2. Corregir los puntos débiles que aparezcan
+  3. Opcionalmente convertirla en PWA (Progressive Web App) para que se pueda instalar en el celular como si fuera una
+  app nativa
+
+
+findstr /s /i "cadena_a_buscar" *.*.
+
+
+ocker compose down
+docker compose up --build

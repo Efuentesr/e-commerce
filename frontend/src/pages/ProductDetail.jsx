@@ -76,19 +76,27 @@ export default function ProductDetail() {
 
   return (
     <div className="max-w-6xl mx-auto px-4 py-8">
-      {/* Breadcrumb */}
-      <nav className="text-sm text-gray-500 mb-6 flex items-center gap-2">
-        <button onClick={() => navigate('/')} className="hover:text-amazon-teal">Tienda</button>
-        <span>/</span>
+      {/* Navegación superior */}
+      <div className="flex items-center gap-4 mb-6">
         <button
-          onClick={() => navigate(`/?category=${product.category}`)}
-          className="hover:text-amazon-teal"
+          onClick={() => navigate(-1)}
+          className="flex items-center gap-1 text-sm font-medium text-amazon-teal hover:underline"
         >
-          {product.category_name}
+          <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+          </svg>
+          Volver
         </button>
-        <span>/</span>
-        <span className="text-gray-800 line-clamp-1">{product.name}</span>
-      </nav>
+        <nav className="text-sm text-gray-400 flex items-center gap-2">
+          <button onClick={() => navigate('/')} className="hover:text-amazon-teal">Tienda</button>
+          <span>/</span>
+          <button onClick={() => navigate(`/?category=${product.category}`)} className="hover:text-amazon-teal">
+            {product.category_name}
+          </button>
+          <span>/</span>
+          <span className="text-gray-600 line-clamp-1">{product.name}</span>
+        </nav>
+      </div>
 
       <div className="flex flex-col lg:flex-row gap-10">
         {/* ── Galería de imágenes ── */}

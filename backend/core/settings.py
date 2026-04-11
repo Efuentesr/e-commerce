@@ -98,6 +98,22 @@ STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
 
+# --- Supabase Storage (activo cuando están configuradas las credenciales) ---
+SUPABASE_URL = env('SUPABASE_URL', default='')
+SUPABASE_S3_ACCESS_KEY_ID = env('SUPABASE_S3_ACCESS_KEY_ID', default='')
+SUPABASE_S3_SECRET_ACCESS_KEY = env('SUPABASE_S3_SECRET_ACCESS_KEY', default='')
+
+if SUPABASE_S3_ACCESS_KEY_ID:
+    DEFAULT_FILE_STORAGE = 'core.storage.SupabaseStorage'
+    AWS_ACCESS_KEY_ID = SUPABASE_S3_ACCESS_KEY_ID
+    AWS_SECRET_ACCESS_KEY = SUPABASE_S3_SECRET_ACCESS_KEY
+    AWS_STORAGE_BUCKET_NAME = 'media'
+    AWS_S3_ENDPOINT_URL = f'{SUPABASE_URL}/storage/v1/s3'
+    AWS_S3_REGION_NAME = 'us-east-1'
+    AWS_QUERYSTRING_AUTH = False
+    AWS_S3_FILE_OVERWRITE = False
+    MEDIA_URL = f'{SUPABASE_URL}/storage/v1/object/public/media/'
+
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 # --- Django REST Framework ---

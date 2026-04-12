@@ -4,6 +4,8 @@ Genera categorías, 112 productos con imágenes Pillow, usuario admin y usuarios
 Idempotente: no genera duplicados si ya existen los datos.
 """
 import io
+import re
+import unicodedata
 import random
 from django.core.management.base import BaseCommand
 from django.core.files.base import ContentFile
@@ -184,6 +186,13 @@ CATALOGO = [
 ]
 
 
+def slugify_filename(nombre):
+    """Convierte un nombre a ASCII seguro para usar como nombre de archivo."""
+    nfkd = unicodedata.normalize('NFKD', nombre)
+    ascii_str = nfkd.encode('ASCII', 'ignore').decode('ASCII')
+    return re.sub(r'[^\w]', '_', ascii_str)
+
+
 def crear_imagen_placeholder(nombre_producto, numero, color_rgb):
     """Genera una imagen JPEG de color sólido con texto como placeholder."""
     from PIL import Image, ImageDraw
@@ -202,7 +211,7 @@ def crear_imagen_placeholder(nombre_producto, numero, color_rgb):
     buffer = io.BytesIO()
     img.save(buffer, format='JPEG', quality=85)
     buffer.seek(0)
-    nombre_archivo = f"producto_{numero}_{nombre_producto[:15].replace(' ', '_')}.jpg"
+    nombre_archivo = f"producto_{numero}_{slugify_filename(nombre_producto[:15])}.jpg"
     return ContentFile(buffer.read(), name=nombre_archivo)
 
 

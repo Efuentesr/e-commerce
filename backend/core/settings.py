@@ -110,6 +110,8 @@ if SUPABASE_S3_ACCESS_KEY_ID:
     AWS_STORAGE_BUCKET_NAME = 'media'
     AWS_S3_ENDPOINT_URL = f'{SUPABASE_URL}/storage/v1/s3'
     AWS_S3_REGION_NAME = 'us-east-1'
+    AWS_S3_ADDRESSING_STYLE = 'path'
+    AWS_S3_SIGNATURE_VERSION = 's3v4'
     AWS_QUERYSTRING_AUTH = False
     AWS_S3_FILE_OVERWRITE = False
     MEDIA_URL = f'{SUPABASE_URL}/storage/v1/object/public/media/'

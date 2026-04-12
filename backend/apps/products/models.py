@@ -2,6 +2,8 @@ from django.db import models
 from django.core.validators import MinValueValidator, MaxValueValidator
 from django.conf import settings
 from django.utils.text import slugify
+from django.db.models.signals import post_delete
+from django.dispatch import receiver
 from simple_history.models import HistoricalRecords
 
 
@@ -72,6 +74,13 @@ class ProductImage(models.Model):
 
     def __str__(self):
         return f"Imagen de {self.product.name}"
+
+
+@receiver(post_delete, sender=ProductImage)
+def borrar_imagen_del_storage(sender, instance, **kwargs):
+    """Elimina el archivo del storage al borrar una ProductImage."""
+    if instance.image:
+        instance.image.delete(save=False)
 
 
 class Review(models.Model):

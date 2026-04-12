@@ -113,7 +113,6 @@ if SUPABASE_S3_ACCESS_KEY_ID:
     AWS_S3_ADDRESSING_STYLE = 'path'
     AWS_S3_SIGNATURE_VERSION = 's3v4'
     AWS_QUERYSTRING_AUTH = False
-    AWS_S3_FILE_OVERWRITE = False
     MEDIA_URL = f'{SUPABASE_URL}/storage/v1/object/public/media/'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'

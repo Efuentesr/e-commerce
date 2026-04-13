@@ -1,6 +1,6 @@
 from rest_framework import generics, permissions, filters
 from rest_framework.response import Response
-from django.db.models import Q
+from django.db.models import Q, Avg, Count
 from .models import Category, Product
 from .serializers import CategorySerializer, ProductListSerializer, ProductDetailSerializer
 
@@ -19,7 +19,14 @@ class ProductListView(generics.ListAPIView):
     permission_classes = [permissions.AllowAny]
 
     def get_queryset(self):
-        queryset = Product.objects.filter(is_active=True).select_related('category').prefetch_related('images', 'reviews')
+        # Calcular rating y conteo directo en la BD (evita prefetch de todas las reseñas)
+        queryset = (
+            Product.objects
+            .filter(is_active=True)
+            .select_related('category')
+            .prefetch_related('images')
+            .annotate(avg_rating=Avg('reviews__rating'), num_reviews=Count('reviews'))
+        )
 
         # Filtro por categoría (slug)
         category_slug = self.request.query_params.get('category')

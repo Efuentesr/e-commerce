@@ -40,7 +40,9 @@ class ProductListSerializer(serializers.ModelSerializer):
 
     def get_featured_image(self, obj):
         """Retorna la URL de la imagen principal del producto."""
-        image = obj.images.filter(is_feature=True).first() or obj.images.first()
+        # Iterar en Python sobre el prefetch cache en lugar de llamar .filter() (que genera una query extra)
+        all_images = obj.images.all()
+        image = next((img for img in all_images if img.is_feature), None) or next(iter(all_images), None)
         if image and image.image:
             request = self.context.get('request')
             if request:
@@ -49,13 +51,19 @@ class ProductListSerializer(serializers.ModelSerializer):
         return None
 
     def get_average_rating(self, obj):
+        # Usa el valor anotado si está disponible (evita cargar todas las reseñas)
+        if hasattr(obj, 'avg_rating'):
+            return round(obj.avg_rating, 1) if obj.avg_rating is not None else None
         reviews = obj.reviews.all()
         if not reviews:
             return None
         return round(sum(r.rating for r in reviews) / len(reviews), 1)
 
     def get_review_count(self, obj):
-        return obj.reviews.count()
+        # Usa el valor anotado si está disponible
+        if hasattr(obj, 'num_reviews'):
+            return obj.num_reviews
+        return len(obj.reviews.all())  # len() usa el prefetch cache, .count() no
 
 
 class ProductDetailSerializer(ProductListSerializer):

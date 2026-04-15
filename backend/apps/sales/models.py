@@ -37,14 +37,16 @@ class CartItem(models.Model):
 class Order(models.Model):
     """
     Orden de compra con máquina de estados:
-    creada → aprobada → pagada
+    creada → aprobada → pagada → entregada
     creada → anulada
     aprobada → anulada (solo admin)
+    pagada  → anulada  (solo admin)
     """
     STATUS_CHOICES = (
         ('creada', 'Creada'),
         ('aprobada', 'Aprobada'),
         ('pagada', 'Pagada'),
+        ('entregada', 'Entregada'),
         ('anulada', 'Anulada'),
     )
 

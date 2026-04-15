@@ -251,6 +251,16 @@ class OrderDetailView(generics.RetrieveUpdateAPIView):
             order.status = 'pagada'
             order.save()
 
+        # ── Entregar (solo admin, solo en estado pagada) ──
+        elif action == 'entregar':
+            if not user.is_staff:
+                return Response({'error': 'Solo el administrador puede marcar una orden como entregada.'}, status=403)
+            if order.status != 'pagada':
+                return Response({'error': 'Solo se pueden marcar como entregadas las órdenes en estado "pagada".'}, status=400)
+
+            order.status = 'entregada'
+            order.save()
+
         # ── Anular ──
         elif action == 'anular':
             # Solo admin puede anular órdenes aprobadas o pagadas

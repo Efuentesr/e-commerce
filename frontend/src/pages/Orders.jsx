@@ -3,18 +3,20 @@ import { Link } from 'react-router-dom'
 import api from '../api/axios'
 
 const STATUS_LABELS = {
-  creada:   { label: 'Creada',   cls: 'badge-creada' },
-  aprobada: { label: 'Aprobada', cls: 'badge-aprobada' },
-  pagada:   { label: 'Pagada',   cls: 'badge-pagada' },
-  anulada:  { label: 'Anulada',  cls: 'badge-anulada' },
+  creada:    { label: 'Creada',     cls: 'badge-creada' },
+  aprobada:  { label: 'Aprobada',   cls: 'badge-aprobada' },
+  pagada:    { label: 'Pagada',     cls: 'badge-pagada' },
+  entregada: { label: 'Entregada',  cls: 'badge-entregada' },
+  anulada:   { label: 'Anulada',    cls: 'badge-anulada' },
 }
 
 const TABS = [
-  { key: 'todas',    label: 'Todas' },
-  { key: 'creada',   label: 'Creadas' },
-  { key: 'aprobada', label: 'Aprobadas' },
-  { key: 'pagada',   label: 'Pagadas' },
-  { key: 'anulada',  label: 'Anuladas' },
+  { key: 'todas',     label: 'Todas' },
+  { key: 'creada',    label: 'Creadas' },
+  { key: 'aprobada',  label: 'Aprobadas' },
+  { key: 'pagada',    label: 'Pagadas' },
+  { key: 'entregada', label: 'Entregadas' },
+  { key: 'anulada',   label: 'Anuladas' },
 ]
 
 export default function Orders() {

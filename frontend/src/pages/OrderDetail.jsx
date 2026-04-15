@@ -4,10 +4,11 @@ import api from '../api/axios'
 import { useAuth } from '../context/AuthContext'
 
 const STATUS_LABELS = {
-  creada:   { label: 'Creada',   cls: 'badge-creada' },
-  aprobada: { label: 'Aprobada', cls: 'badge-aprobada' },
-  pagada:   { label: 'Pagada',   cls: 'badge-pagada' },
-  anulada:  { label: 'Anulada',  cls: 'badge-anulada' },
+  creada:    { label: 'Creada',    cls: 'badge-creada' },
+  aprobada:  { label: 'Aprobada',  cls: 'badge-aprobada' },
+  pagada:    { label: 'Pagada',    cls: 'badge-pagada' },
+  entregada: { label: 'Entregada', cls: 'badge-entregada' },
+  anulada:   { label: 'Anulada',   cls: 'badge-anulada' },
 }
 
 export default function OrderDetail() {
@@ -235,6 +236,21 @@ export default function OrderDetail() {
             className="bg-green-600 hover:bg-green-700 text-white font-semibold py-2 px-4 rounded transition-colors disabled:opacity-50"
           >
             Confirmar Pago
+          </button>
+        )}
+
+        {/* Marcar como entregada (solo admin, orden pagada) */}
+        {user?.is_staff && order.status === 'pagada' && (
+          <button
+            onClick={() => {
+              if (window.confirm(`¿Confirmar la entrega de la orden #${order.id}?`)) {
+                doAction('entregar')
+              }
+            }}
+            disabled={actionLoading}
+            className="bg-purple-600 hover:bg-purple-700 text-white font-semibold py-2 px-4 rounded transition-colors disabled:opacity-50"
+          >
+            Marcar como Entregada
           </button>
         )}
 

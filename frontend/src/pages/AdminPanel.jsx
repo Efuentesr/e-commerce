@@ -3,13 +3,14 @@ import { Link } from 'react-router-dom'
 import api from '../api/axios'
 
 const STATUS_LABELS = {
-  creada:   { label: 'Creada',   cls: 'badge-creada' },
-  aprobada: { label: 'Aprobada', cls: 'badge-aprobada' },
-  pagada:   { label: 'Pagada',   cls: 'badge-pagada' },
-  anulada:  { label: 'Anulada',  cls: 'badge-anulada' },
+  creada:    { label: 'Creada',    cls: 'badge-creada' },
+  aprobada:  { label: 'Aprobada',  cls: 'badge-aprobada' },
+  pagada:    { label: 'Pagada',    cls: 'badge-pagada' },
+  entregada: { label: 'Entregada', cls: 'badge-entregada' },
+  anulada:   { label: 'Anulada',   cls: 'badge-anulada' },
 }
 
-const TABS = ['Todas', 'creada', 'aprobada', 'pagada', 'anulada']
+const TABS = ['Todas', 'creada', 'aprobada', 'pagada', 'entregada', 'anulada']
 
 export default function AdminPanel() {
   const [orders, setOrders] = useState([])
@@ -190,6 +191,21 @@ export default function AdminPanel() {
                         className="text-xs bg-green-500 text-white px-3 py-1 rounded hover:bg-green-600 disabled:opacity-50"
                       >
                         {busy ? '...' : 'Marcar Pagada'}
+                      </button>
+                    )}
+
+                    {/* Marcar como entregada (solo desde pagada) */}
+                    {order.status === 'pagada' && (
+                      <button
+                        onClick={() => {
+                          if (window.confirm(`¿Confirmar entrega de la orden #${order.id}?`)) {
+                            doAction(order.id, 'entregar')
+                          }
+                        }}
+                        disabled={busy}
+                        className="text-xs bg-purple-600 text-white px-3 py-1 rounded hover:bg-purple-700 disabled:opacity-50"
+                      >
+                        {busy ? '...' : 'Marcar Entregada'}
                       </button>
                     )}
 

@@ -6,7 +6,7 @@ from django.shortcuts import get_object_or_404
 from django.db import transaction
 from decimal import Decimal
 
-from .models import Cart, CartItem, Order, OrderItem
+from .models import Cart, CartItem, Order, OrderItem, OrderStatusHistory
 from .serializers import CartSerializer, OrderSerializer, OrderListSerializer
 from apps.products.models import Product
 
@@ -118,6 +118,16 @@ class SyncCartView(APIView):
 
 # ─────────────────────────── ÓRDENES ───────────────────────────
 
+def _registrar_historial(order, from_status, to_status, user, note):
+    """Crea un registro de cambio de estado en el historial de la orden."""
+    OrderStatusHistory.objects.create(
+        order=order,
+        from_status=from_status,
+        to_status=to_status,
+        changed_by=user,
+        note=note,
+    )
+
 class OrderListCreateView(generics.ListCreateAPIView):
     """Lista las órdenes del usuario (admin ve todas). Crea una orden desde el carrito."""
     permission_classes = [permissions.IsAuthenticated]
@@ -177,6 +187,9 @@ class OrderListCreateView(generics.ListCreateAPIView):
         # Vaciar el carrito
         cart.items.all().delete()
 
+        # Registrar creación en historial
+        _registrar_historial(order, None, 'creada', request.user, f"Orden creada por {request.user.username}")
+
         serializer = OrderSerializer(order)
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
@@ -189,8 +202,8 @@ class OrderDetailView(generics.RetrieveUpdateAPIView):
     def get_queryset(self):
         user = self.request.user
         if user.is_staff:
-            return Order.objects.all().prefetch_related('items__product')
-        return Order.objects.filter(customer=user).prefetch_related('items__product')
+            return Order.objects.all().prefetch_related('items__product', 'history__changed_by')
+        return Order.objects.filter(customer=user).prefetch_related('items__product', 'history__changed_by')
 
     @transaction.atomic
     def partial_update(self, request, *args, **kwargs):
@@ -210,6 +223,7 @@ class OrderDetailView(generics.RetrieveUpdateAPIView):
                     return Response({'error': 'Descuento inválido.'}, status=400)
                 order.discount = discount
                 order.save()
+                _registrar_historial(order, 'creada', 'creada', user, f"Descuento aplicado por {user.username}: ${discount}")
             except Exception:
                 return Response({'error': 'Valor de descuento inválido.'}, status=400)
 
@@ -233,6 +247,7 @@ class OrderDetailView(generics.RetrieveUpdateAPIView):
 
             order.status = 'aprobada'
             order.save()
+            _registrar_historial(order, 'creada', 'aprobada', user, f"Orden aprobada por {user.username}")
 
         # ── Pagar (solo admin, solo en estado aprobada) ──
         elif action == 'pagar':
@@ -250,6 +265,7 @@ class OrderDetailView(generics.RetrieveUpdateAPIView):
 
             order.status = 'pagada'
             order.save()
+            _registrar_historial(order, 'aprobada', 'pagada', user, f"Pago confirmado por {user.username}")
 
         # ── Entregar (solo admin, solo en estado pagada) ──
         elif action == 'entregar':
@@ -260,6 +276,7 @@ class OrderDetailView(generics.RetrieveUpdateAPIView):
 
             order.status = 'entregada'
             order.save()
+            _registrar_historial(order, 'pagada', 'entregada', user, f"Orden marcada como entregada por {user.username}")
 
         # ── Anular ──
         elif action == 'anular':
@@ -290,8 +307,10 @@ class OrderDetailView(generics.RetrieveUpdateAPIView):
                     product.stock += item.quantity
                     product.save()
 
+            prev_status = order.status
             order.status = 'anulada'
             order.save()
+            _registrar_historial(order, prev_status, 'anulada', user, f"Orden anulada por {user.username} desde estado '{prev_status}'")
 
         else:
             return Response({'error': f'Acción "{action}" no reconocida.'}, status=400)

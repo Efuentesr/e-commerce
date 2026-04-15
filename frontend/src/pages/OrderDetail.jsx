@@ -209,6 +209,27 @@ export default function OrderDetail() {
         </div>
       )}
 
+      {/* Historial de estados */}
+      {order.history?.length > 0 && (
+        <div className="card p-5 mb-4">
+          <h2 className="font-bold mb-4">Historial del pedido</h2>
+          <ol className="relative border-l border-gray-200 ml-2 space-y-4">
+            {order.history.map((entry, idx) => (
+              <li key={idx} className="ml-4">
+                <span className="absolute -left-1.5 mt-1 w-3 h-3 rounded-full bg-amazon-teal border-2 border-white" />
+                <p className="text-sm font-medium text-gray-800">{entry.note}</p>
+                <p className="text-xs text-gray-400">
+                  {new Date(entry.changed_at).toLocaleString('es-AR', {
+                    year: 'numeric', month: 'short', day: 'numeric',
+                    hour: '2-digit', minute: '2-digit',
+                  })}
+                </p>
+              </li>
+            ))}
+          </ol>
+        </div>
+      )}
+
       {/* Acciones */}
       {error && <p className="text-red-500 text-sm mb-3">{error}</p>}
 

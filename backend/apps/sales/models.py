@@ -88,6 +88,24 @@ class OrderItem(models.Model):
         return f"{self.quantity} x {self.product.name}"
 
 
+class OrderStatusHistory(models.Model):
+    """Registro de cada cambio de estado en una orden."""
+    order = models.ForeignKey(Order, on_delete=models.CASCADE, related_name='history')
+    from_status = models.CharField(max_length=20, null=True, blank=True)  # null en la creación inicial
+    to_status = models.CharField(max_length=20)
+    changed_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, related_name='order_history'
+    )
+    changed_at = models.DateTimeField(auto_now_add=True)
+    note = models.CharField(max_length=255)
+
+    class Meta:
+        ordering = ['changed_at']
+
+    def __str__(self):
+        return f"Orden #{self.order_id}: {self.from_status} → {self.to_status}"
+
+
 class Payment(models.Model):
     """Registro de pago asociado a una orden."""
     order = models.OneToOneField(Order, on_delete=models.CASCADE, related_name='payment')

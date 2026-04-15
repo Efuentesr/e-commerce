@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Cart, CartItem, Order, OrderItem
+from .models import Cart, CartItem, Order, OrderItem, OrderStatusHistory
 from apps.products.serializers import ProductListSerializer
 
 
@@ -32,19 +32,28 @@ class OrderItemSerializer(serializers.ModelSerializer):
         fields = ['id', 'product', 'product_name', 'product_code', 'price', 'quantity', 'subtotal']
 
 
+class OrderStatusHistorySerializer(serializers.ModelSerializer):
+    changed_by_username = serializers.CharField(source='changed_by.username', read_only=True, default=None)
+
+    class Meta:
+        model = OrderStatusHistory
+        fields = ['from_status', 'to_status', 'changed_by_username', 'changed_at', 'note']
+
+
 class OrderSerializer(serializers.ModelSerializer):
-    """Serializer completo de una orden incluyendo sus items."""
+    """Serializer completo de una orden incluyendo sus items e historial de estados."""
     items = OrderItemSerializer(many=True, read_only=True)
     customer_username = serializers.CharField(source='customer.username', read_only=True)
     customer_phone = serializers.CharField(source='customer.phone', read_only=True, default=None)
     final_price = serializers.DecimalField(max_digits=10, decimal_places=2, read_only=True)
+    history = OrderStatusHistorySerializer(many=True, read_only=True)
 
     class Meta:
         model = Order
         fields = [
             'id', 'customer', 'customer_username', 'customer_phone', 'status',
             'total_price', 'discount', 'final_price',
-            'items', 'created_at', 'updated_at',
+            'items', 'history', 'created_at', 'updated_at',
         ]
         read_only_fields = ['id', 'customer', 'total_price', 'created_at', 'updated_at']
 

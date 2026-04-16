@@ -66,7 +66,7 @@ export default function OrderDetail() {
 
   const shareWhatsApp = () => {
     if (!order) return
-    const items = order.items.map(i => `• ${i.product_name} x${i.quantity} = $${parseFloat(i.subtotal).toFixed(2)}`).join('\n')
+    const items = order.items.map((i,index) => `${index}• ${i.product_name} x${i.quantity} = $${parseFloat(i.subtotal).toFixed(2)}`).join('\n')
     const msg = [
       `*Pedido #${order.id}* - TiendaOnline`,
       `Cliente: ${order.customer_username}`,

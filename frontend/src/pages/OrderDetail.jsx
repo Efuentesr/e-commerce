@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { useParams, useNavigate, Link } from 'react-router-dom'
 import api from '../api/axios'
 import { useAuth } from '../context/AuthContext'
+import ConfirmDialog from '../components/ConfirmDialog'
 
 const STATUS_LABELS = {
   creada:    { label: 'Creada',    cls: 'badge-creada' },
@@ -21,6 +22,7 @@ export default function OrderDetail() {
   const [error, setError] = useState('')
   const [discountInput, setDiscountInput] = useState('')
   const [discountSaved, setDiscountSaved] = useState(false)
+  const [confirm, setConfirm] = useState(null)
 
   const fetchOrder = () => {
     api.get(`/sales/orders/${id}/`)
@@ -66,7 +68,7 @@ export default function OrderDetail() {
 
   const shareWhatsApp = () => {
     if (!order) return
-    const items = order.items.map((i,index) => `${index}• ${i.product_name} x${i.quantity} = $${parseFloat(i.subtotal).toFixed(2)}`).join('\n')
+    const items = order.items.map((i, index) => `${String(index + 1).padStart(2, '0')} ${i.product_name} x${i.quantity} = $${parseFloat(i.subtotal).toFixed(2)}`).join('\n')
     const msg = [
       `*Pedido #${order.id}* - TiendaOnline`,
       `Cliente: ${order.customer_username}`,
@@ -230,6 +232,15 @@ export default function OrderDetail() {
         </div>
       )}
 
+      {/* Diálogo de confirmación */}
+      {confirm && (
+        <ConfirmDialog
+          message={confirm.message}
+          onConfirm={() => { doAction(confirm.action, confirm.extra); setConfirm(null) }}
+          onCancel={() => setConfirm(null)}
+        />
+      )}
+
       {/* Acciones */}
       {error && <p className="text-red-500 text-sm mb-3">{error}</p>}
 
@@ -237,7 +248,7 @@ export default function OrderDetail() {
         {/* Aprobar (cliente, orden creada) */}
         {order.status === 'creada' && !user?.is_staff && (
           <button
-            onClick={() => doAction('aprobar')}
+            onClick={() => setConfirm({ message: `¿Confirmar la aprobación del pedido #${order.id}?`, action: 'aprobar', extra: {} })}
             disabled={actionLoading}
             className="btn-primary disabled:opacity-50"
           >
@@ -248,11 +259,7 @@ export default function OrderDetail() {
         {/* Marcar como pagada (solo admin, orden aprobada) */}
         {user?.is_staff && order.status === 'aprobada' && (
           <button
-            onClick={() => {
-              if (window.confirm(`¿Confirmar el pago de la orden #${order.id}?`)) {
-                doAction('pagar')
-              }
-            }}
+            onClick={() => setConfirm({ message: `¿Confirmar el pago de la orden #${order.id}?`, action: 'pagar', extra: {} })}
             disabled={actionLoading}
             className="bg-green-600 hover:bg-green-700 text-white font-semibold py-2 px-4 rounded transition-colors disabled:opacity-50"
           >
@@ -263,11 +270,7 @@ export default function OrderDetail() {
         {/* Marcar como entregada (solo admin, orden pagada) */}
         {user?.is_staff && order.status === 'pagada' && (
           <button
-            onClick={() => {
-              if (window.confirm(`¿Confirmar la entrega de la orden #${order.id}?`)) {
-                doAction('entregar')
-              }
-            }}
+            onClick={() => setConfirm({ message: `¿Confirmar la entrega de la orden #${order.id}?`, action: 'entregar', extra: {} })}
             disabled={actionLoading}
             className="bg-purple-600 hover:bg-purple-700 text-white font-semibold py-2 px-4 rounded transition-colors disabled:opacity-50"
           >
@@ -282,12 +285,13 @@ export default function OrderDetail() {
           (user?.is_staff && (order.status === 'aprobada' || order.status === 'pagada'))
         ) && (
           <button
-            onClick={() => {
-              const msg = order.status === 'pagada'
+            onClick={() => setConfirm({
+              message: order.status === 'pagada'
                 ? '¿Anular esta orden pagada? El stock será devuelto al inventario.'
-                : '¿Estás seguro de que querés anular este pedido?'
-              if (window.confirm(msg)) doAction('anular')
-            }}
+                : '¿Estás seguro de que querés anular este pedido?',
+              action: 'anular',
+              extra: {},
+            })}
             disabled={actionLoading}
             className="btn-danger disabled:opacity-50"
           >

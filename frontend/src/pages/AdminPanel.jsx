@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import api from '../api/axios'
+import ConfirmDialog from '../components/ConfirmDialog'
 
 const STATUS_LABELS = {
   creada:    { label: 'Creada',    cls: 'badge-creada' },
@@ -19,6 +20,7 @@ export default function AdminPanel() {
   const [actionLoading, setActionLoading] = useState({})
   const [discountEditing, setDiscountEditing] = useState({})  // { [orderId]: value }
   const [error, setError] = useState('')
+  const [confirm, setConfirm] = useState(null)
 
   const fetchOrders = () => {
     api.get('/sales/orders/')
@@ -65,6 +67,14 @@ export default function AdminPanel() {
     <div className="max-w-6xl mx-auto px-4 py-8">
       <h1 className="text-2xl font-bold mb-2">Panel de Administración</h1>
       <p className="text-gray-500 text-sm mb-6">Gestión de órdenes de compra</p>
+
+      {confirm && (
+        <ConfirmDialog
+          message={confirm.message}
+          onConfirm={() => { doAction(confirm.orderId, confirm.action); setConfirm(null) }}
+          onCancel={() => setConfirm(null)}
+        />
+      )}
 
       {error && (
         <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded mb-4 text-sm">
@@ -182,11 +192,7 @@ export default function AdminPanel() {
                     {/* Marcar como pagada (solo aprobada) */}
                     {order.status === 'aprobada' && (
                       <button
-                        onClick={() => {
-                          if (window.confirm(`¿Confirmar pago de la orden #${order.id}?`)) {
-                            doAction(order.id, 'pagar')
-                          }
-                        }}
+                        onClick={() => setConfirm({ message: `¿Confirmar pago de la orden #${order.id}?`, orderId: order.id, action: 'pagar' })}
                         disabled={busy}
                         className="text-xs bg-green-500 text-white px-3 py-1 rounded hover:bg-green-600 disabled:opacity-50"
                       >
@@ -197,11 +203,7 @@ export default function AdminPanel() {
                     {/* Marcar como entregada (solo desde pagada) */}
                     {order.status === 'pagada' && (
                       <button
-                        onClick={() => {
-                          if (window.confirm(`¿Confirmar entrega de la orden #${order.id}?`)) {
-                            doAction(order.id, 'entregar')
-                          }
-                        }}
+                        onClick={() => setConfirm({ message: `¿Confirmar entrega de la orden #${order.id}?`, orderId: order.id, action: 'entregar' })}
                         disabled={busy}
                         className="text-xs bg-purple-600 text-white px-3 py-1 rounded hover:bg-purple-700 disabled:opacity-50"
                       >
@@ -212,12 +214,13 @@ export default function AdminPanel() {
                     {/* Anular (admin: creada, aprobada o pagada — pagada devuelve stock) */}
                     {(order.status === 'creada' || order.status === 'aprobada' || order.status === 'pagada') && (
                       <button
-                        onClick={() => {
-                          const msg = order.status === 'pagada'
+                        onClick={() => setConfirm({
+                          message: order.status === 'pagada'
                             ? `¿Anular la orden #${order.id}? El stock será devuelto al inventario.`
-                            : `¿Anular la orden #${order.id}?`
-                          if (window.confirm(msg)) doAction(order.id, 'anular')
-                        }}
+                            : `¿Anular la orden #${order.id}?`,
+                          orderId: order.id,
+                          action: 'anular',
+                        })}
                         disabled={busy}
                         className="text-xs bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600 disabled:opacity-50"
                       >
